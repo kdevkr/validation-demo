@@ -2,12 +2,14 @@ package kr.kdev.demo;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import kr.kdev.demo.account.ContactRegisterRequest;
 import kr.kdev.demo.account.PasswordUpdateRequest;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Locale;
 
 @DisplayName("Account Test")
@@ -78,5 +80,28 @@ class AccountTest extends ApplicationTests {
                 .log().ifValidationFails()
                 .statusCode(400)
                 .body("exception", Matchers.is("org.springframework.web.bind.MethodArgumentNotValidException"));
+    }
+
+    @DisplayName("Register Contact")
+    @Test
+    void givenContact_whenRegister_thenOk() {
+        ContactRegisterRequest request = new ContactRegisterRequest().setAccountId(0L)
+                .setContacts(List.of(new ContactRegisterRequest.Contact()
+                        .setName("otter")
+                        .setPhone(" +82 1012345678 ")
+                        .setEmail("kdevkr@gmail.com")));
+
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(request)
+
+                .when()
+                .log().all()
+                .post("/api/contact")
+
+                .then()
+                .log().ifValidationFails()
+                .statusCode(200)
+                .body(Matchers.is("true"));
     }
 }
